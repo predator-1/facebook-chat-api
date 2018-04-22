@@ -4,6 +4,7 @@ var bluebird = require("bluebird");
 var request = bluebird.promisify(require("request").defaults({ jar: true }));
 var stream = require("stream");
 var log = require("npmlog");
+var userAgent = "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_10_2) AppleWebKit/600.3.18 (KHTML, like Gecko) Version/8.0.3 Safari/600.3.18";
 
 function getHeaders(url) {
   var headers = {
@@ -11,8 +12,7 @@ function getHeaders(url) {
     Referer: "https://www.facebook.com/",
     Host: url.replace("https://", "").split("/")[0],
     Origin: "https://www.facebook.com",
-    "User-Agent":
-      "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_10_2) AppleWebKit/600.3.18 (KHTML, like Gecko) Version/8.0.3 Safari/600.3.18",
+    "User-Agent": userAgent,   
     Connection: "keep-alive"
   };
 
@@ -1275,5 +1275,6 @@ module.exports = {
   formatDate,
   decodeClientPayload,
   getAppState,
-  getAdminTextMessageType
+  getAdminTextMessageType,
+  userAgent
 };
