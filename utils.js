@@ -1287,6 +1287,5 @@ module.exports = {
   formatDate,
   decodeClientPayload,
   getAppState,
-  getAdminTextMessageType,
-  userAgent
+  getAdminTextMessageType
 };
