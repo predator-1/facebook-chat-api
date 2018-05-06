@@ -461,4 +461,5 @@ function login(loginData, options, callback) {
   loginHelper(loginData.appState, loginData.email, loginData.password, globalOptions, callback);
 }
 
-module.exports = login;
+module.exports.login = login;
+module.exports.globals = require('./globals');

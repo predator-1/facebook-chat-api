@@ -4,7 +4,7 @@ var bluebird = require("bluebird");
 var request = bluebird.promisify(require("request").defaults({ jar: true }));
 var stream = require("stream");
 var log = require("npmlog");
-var userAgent = "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_10_2) AppleWebKit/600.3.18 (KHTML, like Gecko) Version/8.0.3 Safari/600.3.18";
+const golbals = require('./globals');
 
 function getHeaders(url) {
   var headers = {
@@ -12,7 +12,7 @@ function getHeaders(url) {
     Referer: "https://www.facebook.com/",
     Host: url.replace("https://", "").split("/")[0],
     Origin: "https://www.facebook.com",
-    "User-Agent": userAgent,   
+    "User-Agent": golbals.GetUserAgent(),   
     Connection: "keep-alive"
   };
 
@@ -46,6 +46,10 @@ function get(url, jar, qs) {
     jar: jar,
     gzip: true
   };
+  let proxy = golbals.GetProxy();
+  if(proxy){
+    op.proxy = proxy;
+  }
 
   return request(op).then(function(res) {
     return res[0];
@@ -62,6 +66,10 @@ function post(url, jar, form) {
     jar: jar,
     gzip: true
   };
+  let proxy = golbals.GetProxy();
+  if(proxy){
+    op.proxy = proxy;
+  }
 
   return request(op).then(function(res) {
     return res[0];
@@ -81,6 +89,10 @@ function postFormData(url, jar, form, qs) {
     jar: jar,
     gzip: true
   };
+  let proxy = golbals.GetProxy();
+  if(proxy){
+    op.proxy = proxy;
+  }
 
   return request(op).then(function(res) {
     return res[0];
