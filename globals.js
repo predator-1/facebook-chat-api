@@ -21,7 +21,7 @@ module.exports = class Globals{
 
     static GetProxy(){
         if(_proxy.Ip){
-            return `https://${_proxy.Login}:${_proxy.Password}@${_proxy.Ip}:${_proxy.Port}`;
+            return `http://${_proxy.Login ? _proxy.Login : ''}:${_proxy.Password ? _proxy.Password : ''}@${_proxy.Ip}:${_proxy.Port}`;
         }
         return null;
     }
