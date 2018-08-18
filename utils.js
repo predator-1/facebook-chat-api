@@ -6,7 +6,7 @@ var stream = require("stream");
 var log = require("npmlog");
 const golbals = require('./globals');
 
-function getHeaders(url) {
+function getHeaders(url, options) {
   var headers = {
     "Content-Type": "application/x-www-form-urlencoded",
     Referer: "https://www.facebook.com/",
@@ -28,7 +28,7 @@ function isReadableStream(obj) {
   );
 }
 
-function get(url, jar, qs) {
+function get(url, jar, qs, options) {
   // I'm still confused about this
   if (getType(qs) === "Object") {
     for (var prop in qs) {
@@ -38,7 +38,7 @@ function get(url, jar, qs) {
     }
   }
   var op = {
-    headers: getHeaders(url),
+    headers: getHeaders(url, options),
     timeout: 60000,
     qs: qs,
     url: url,
@@ -56,9 +56,9 @@ function get(url, jar, qs) {
   });
 }
 
-function post(url, jar, form) {
+function post(url, jar, form, options) {
   var op = {
-    headers: getHeaders(url),
+    headers: getHeaders(url, options),
     timeout: 60000,
     url: url,
     method: "POST",
@@ -76,8 +76,8 @@ function post(url, jar, form) {
   });
 }
 
-function postFormData(url, jar, form, qs) {
-  var headers = getHeaders(url);
+function postFormData(url, jar, form, qs, options) {
+  var headers = getHeaders(url, options);
   headers["Content-Type"] = "multipart/form-data";
   var op = {
     headers: headers,
@@ -970,11 +970,11 @@ function makeDefaults(html, userID, ctx) {
   }
 
   function postWithDefaults(url, jar, form) {
-    return post(url, jar, mergeWithDefaults(form));
+    return post(url, jar, mergeWithDefaults(form), ctx.globalOptions);
   }
 
   function getWithDefaults(url, jar, qs) {
-    return get(url, jar, mergeWithDefaults(qs));
+    return get(url, jar, mergeWithDefaults(qs), ctx.globalOptions);
   }
 
   function postFormDataWithDefault(url, jar, form, qs) {
@@ -982,7 +982,8 @@ function makeDefaults(html, userID, ctx) {
       url,
       jar,
       mergeWithDefaults(form),
-      mergeWithDefaults(qs)
+      mergeWithDefaults(qs),
+      ctx.globalOptions 
     );
   }
 
@@ -1102,8 +1103,8 @@ function parseAndCheckLogin(ctx, defaultFuncs, retryCount) {
 
             // Update ttstamp since that depends on fb_dtsg
             ctx.ttstamp = "2";
-            for (var i = 0; i < ctx.fb_dtsg.length; i++) {
-              ctx.ttstamp += ctx.fb_dtsg.charCodeAt(i);
+            for (var j = 0; j < ctx.fb_dtsg.length; j++) {
+              ctx.ttstamp += ctx.fb_dtsg.charCodeAt(j);
             }
           }
         }
@@ -1289,3 +1290,4 @@ module.exports = {
   getAppState,
   getAdminTextMessageType
 };
+
