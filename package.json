@@ -36,13 +36,29 @@
     "eslint": "^4.19.1"
   },
   "eslintConfig": {
-    "env": { "es6": true, "node": true },
+    "env": {
+      "es6": true,
+      "node": true
+    },
     "extends": "eslint:recommended",
-    "parserOptions": { "sourceType": "module" },
+    "parserOptions": {
+      "sourceType": "module"
+    },
     "rules": {
-        "linebreak-style": [ "error", "unix" ],
-        "semi": [ "error", "always" ],
-        "no-unused-vars": [1, {"argsIgnorePattern": "^_"}]
+      "linebreak-style": [
+        "error",
+        "unix"
+      ],
+      "semi": [
+        "error",
+        "always"
+      ],
+      "no-unused-vars": [
+        1,
+        {
+          "argsIgnorePattern": "^_"
+        }
+      ]
     }
   }
 }
