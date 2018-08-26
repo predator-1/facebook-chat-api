@@ -1,11 +1,11 @@
 'use strict';
 
-let _userAgent = 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_10_2) AppleWebKit/600.3.18 (KHTML, like Gecko) Version/8.0.3 Safari/600.3.18';
-var _proxy = {
-    Ip:null,
-    Port:null,
-    Login:null,
-    Password:null
+let _userAgent = 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/68.0.3440.106 Safari/537.36';
+let _proxy = {
+    ip:null,
+    port:null,
+    login:null,
+    password:null
 };
 
 module.exports = class Globals{
@@ -21,7 +21,7 @@ module.exports = class Globals{
 
     static GetProxy(){
         if(_proxy.Ip){
-            return `http://${_proxy.Login ? _proxy.Login : ''}:${_proxy.Password ? _proxy.Password : ''}@${_proxy.Ip}:${_proxy.Port}`;
+            return `http://${_proxy.login ? _proxy.login : ''}:${_proxy.password ? _proxy.password : ''}@${_proxy.ip}:${_proxy.port}`;
         }
         return null;
     }
