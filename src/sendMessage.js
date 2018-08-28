@@ -303,6 +303,16 @@ module.exports = function(defaultFuncs, api, ctx) {
     cb();
   }
 
+  function handleWave(msg, form, callback, cb) {
+    if (msg.wave) {
+      form["lightweight_action_attachment[lwa_state]"] = 'RECIPROCATED';
+      form["lightweight_action_attachment[lwa_type]"] = 'WAVE';
+      cb();
+    } else {
+      cb();
+    }
+  }
+
   return function sendMessage(msg, threadID, callback) {
     if (
       !callback &&
@@ -391,7 +401,9 @@ module.exports = function(defaultFuncs, api, ctx) {
         handleUrl(msg, form, callback, () =>
           handleEmoji(msg, form, callback, () =>
             handleMention(msg, form, callback, () =>
-              send(form, threadID, messageAndOTID, callback)
+              handleWave(msg, form, callback, () =>
+                send(form, threadID, messageAndOTID, callback)
+              )
             )
           )
         )
