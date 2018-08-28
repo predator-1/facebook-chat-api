@@ -11,7 +11,8 @@ var allowedProperties = {
   emoji: true,
   emojiSize: true,
   body: true,
-  mentions: true
+  mentions: true,
+  wave: true,
 };
 
 module.exports = function(defaultFuncs, api, ctx) {
