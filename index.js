@@ -112,6 +112,7 @@ function buildAPI(globalOptions, html, jar) {
     'threadColors',
     'getFriendsRequests',
     'acceptFriendRequest',
+    'deleteFromFriends',
     
     // Deprecated features
     "getThreadListDeprecated",
