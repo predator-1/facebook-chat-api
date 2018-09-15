@@ -110,7 +110,8 @@ function buildAPI(globalOptions, html, jar) {
     'setMessageReaction',
     'setTitle',
     'threadColors',
-
+    'getFriendsRequests',
+    
     // Deprecated features
     "getThreadListDeprecated",
     'getThreadHistoryDeprecated',
