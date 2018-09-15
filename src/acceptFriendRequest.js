@@ -14,7 +14,7 @@ module.exports = function(defaultFuncs, api, ctx) {
   return function acceptFriendRequest(id, callback) {
     defaultFuncs
       .post(
-        "https://www.facebook.com/chat/user_info_all",
+        "https://www.facebook.com/requests/friends/ajax/",
         ctx.jar,
         { viewer: ctx.userID, action:'confirm', id }
       )
