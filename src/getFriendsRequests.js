@@ -4,39 +4,26 @@ var cheerio = require("cheerio");
 var utils = require("../utils");
 var log = require("npmlog");
 
-// [almost] copy pasted from one of FB's minified file (GenderConst)
-var GENDERS = {
-  0: "unknown",
-  1: "female_singular",
-  2: "male_singular",
-  3: "female_singular_guess",
-  4: "male_singular_guess",
-  5: "mixed",
-  6: "neuter_singular",
-  7: "unknown_singular",
-  8: "female_plural",
-  9: "male_plural",
-  10: "neuter_plural",
-  11: "unknown_plural"
-};
+function onlyUnique(value, index, self) { 
+  return self.indexOf(value) === index;
+}
 
 function formatData(obj) {
-  return Object.keys(obj).map(function(key) {
-    var user = obj[key];
-    return {
-      alternateName: user.alternateName,
-      firstName: user.firstName,
-      gender: GENDERS[user.gender],
-      userID: utils.formatID(user.id.toString()),
-      isFriend: user.is_friend != null && user.is_friend ? true : false,
-      fullName: user.name,
-      profilePicture: user.thumbSrc,
-      type: user.type,
-      profileUrl: user.uri,
-      vanity: user.vanity,
-      isBirthday: !!user.is_birthday
-    };
-  });
+  if(obj.length > 0){
+    if(obj[0].length > 0){
+      let htmlObj = obj[0][obj[0].length-1];
+      if(htmlObj.__html){
+        let matches = htmlObj.__html.match(/[0-9]+_1_req/ig);
+        if(matches && matches.length && matches.length > 0){
+          let uniques = matches.filter( onlyUnique );
+          return uniques.map(function(key) {
+            return key.replace('_1_req', '');
+          });
+        }
+      }
+    }
+    return null;
+  }
 }
 
 module.exports = function(defaultFuncs, api, ctx) {
@@ -46,11 +33,10 @@ module.exports = function(defaultFuncs, api, ctx) {
     }
 
     defaultFuncs
-      .postFormData(
-        "https://www.facebook.com/friends/requests",
+      .post(
+        "https://www.facebook.com/ajax/requests/loader/",
         ctx.jar,
-        {},
-        { viewer: ctx.userID }
+        null
       )
       .then(utils.parseAndCheckLogin(ctx, defaultFuncs))
       .then(function(resData) {
@@ -60,7 +46,7 @@ module.exports = function(defaultFuncs, api, ctx) {
         if (resData.error) {
           throw resData;
         }
-        callback(null, formatData(resData.payload));
+        callback(null, formatData(resData.domops));
       })
       .catch(function(err) {
         log.error("getFriendsRequests", err);

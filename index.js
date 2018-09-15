@@ -111,6 +111,7 @@ function buildAPI(globalOptions, html, jar) {
     'setTitle',
     'threadColors',
     'getFriendsRequests',
+    'acceptFriendRequest',
     
     // Deprecated features
     "getThreadListDeprecated",
