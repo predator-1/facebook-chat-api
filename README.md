@@ -26,6 +26,9 @@ If you want to use bleeding edge (directly from github) to test new features or 
 npm install Schmavery/facebook-chat-api
 ```
 
+## Testing your bots
+If you want to test your bots without creating another account on Facebook, you can use [Facebook Whitehat Accounts](https://www.facebook.com/whitehat/accounts/).
+
 ## Example Usage
 ```javascript
 const login = require("facebook-chat-api");
@@ -73,6 +76,7 @@ Result:
 * [`api.listen`](DOCS.md#listen)
 * [`api.logout`](DOCS.md#logout)
 * [`api.markAsRead`](DOCS.md#markAsRead)
+* [`api.markAsReadAll`](DOCS.md#markAsReadAll)
 * [`api.muteThread`](DOCS.md#muteThread)
 * [`api.removeUserFromGroup`](DOCS.md#removeUserFromGroup)
 * [`api.resolvePhotoUrl`](DOCS.md#resolvePhotoUrl)
@@ -82,11 +86,12 @@ Result:
 * [`api.setMessageReaction`](DOCS.md#setMessageReaction)
 * [`api.setOptions`](DOCS.md#setOptions)
 * [`api.setTitle`](DOCS.md#setTitle)
+* [`api.unsendMessage`](DOCS.md#unsendMessage)
 
 ## Main Functionality
 
 ### Sending a message
-#### api.sendMessage(message, threadID[, callback])
+#### api.sendMessage(message, threadID[, callback][, messageID])
 
 Various types of message can be sent:
 * *Regular:* set field `body` to the desired message as a string.
@@ -226,6 +231,7 @@ login({appState: JSON.parse(fs.readFileSync('appstate.json', 'utf8'))}, (err, ap
 ## Projects using this API
 
 - [Messer](https://github.com/mjkaufer/Messer) - Command-line messaging for Facebook Messenger
+- [messen](https://github.com/tomquirk/messen) - Rapidly build Facebook Messenger apps in Node.js
 - [Concierge](https://github.com/concierge/Concierge) - Concierge is a highly modular, easily extensible general purpose chat bot with a built in package manager
 - [Marc Zuckerbot](https://github.com/bsansouci/marc-zuckerbot) - Facebook chat bot
 - [Marc Thuckerbot](https://github.com/bsansouci/lisp-bot) - Programmable lisp bot
@@ -242,3 +248,4 @@ login({appState: JSON.parse(fs.readFileSync('appstate.json', 'utf8'))}, (err, ap
 - [AssumeZero-Bot](https://github.com/AstroCB/AssumeZero-Bot) – A highly customizable Facebook Messenger bot for group chats.
 - [Miscord](https://github.com/Bjornskjald/miscord) - An easy-to-use Facebook bridge for Discord.
 - [chat-bridge](https://github.com/rexx0520/chat-bridge) - A Messenger, Telegram and IRC chat bridge.
+- [messenger-auto-reply](https://gitlab.com/theSander/messenger-auto-reply) - An auto-reply service for Messenger.

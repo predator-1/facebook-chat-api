@@ -36,6 +36,12 @@ function setOptions(globalOptions, options) {
       case 'userAgent':
         globalOptions.userAgent = options.userAgent;
         break;
+      case 'autoMarkDelivery':
+        globalOptions.autoMarkDelivery = options.autoMarkDelivery;
+        break;
+      case 'autoMarkRead':
+        globalOptions.autoMarkRead = options.autoMarkRead;
+        break;
       default:
         log.warn("setOptions", "Unrecognized option given to setOptions: " + key);
         break;
@@ -99,8 +105,11 @@ function buildAPI(globalOptions, html, jar) {
     'getUserInfo',
     'handleMessageRequest',
     'listen',
+    'listenMqtt',
     'logout',
+    'markAsDelivered',
     'markAsRead',
+    'markAsReadAll',
     'muteThread',
     'removeUserFromGroup',
     'resolvePhotoUrl',
@@ -113,7 +122,7 @@ function buildAPI(globalOptions, html, jar) {
     'getFriendsRequests',
     'acceptFriendRequest',
     'deleteFromFriends',
-    
+    'unsendMessage',
     // Deprecated features
     "getThreadListDeprecated",
     'getThreadHistoryDeprecated',
@@ -147,7 +156,7 @@ function makeLogin(jar, email, password, loginOptions, callback) {
 
     var form = utils.arrToForm(arr);
     form.lsd = utils.getFrom(html, "[\"LSD\",[],{\"token\":\"", "\"}");
-    form.lgndim = new Buffer("{\"w\":1440,\"h\":900,\"aw\":1440,\"ah\":834,\"c\":24}").toString('base64');
+    form.lgndim = Buffer.from("{\"w\":1440,\"h\":900,\"aw\":1440,\"ah\":834,\"c\":24}").toString('base64');
     form.email = email;
     form.pass = password;
     form.default_persistent = '0';
@@ -461,6 +470,8 @@ function login(loginData, options, callback) {
     listenEvents: false,
     updatePresence: false,
     forceLogin: false,
+    autoMarkDelivery: true,
+    autoMarkRead: false,
     logRecordSize: defaultLogRecordSize,
     userAgent: "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_10_2) AppleWebKit/600.3.18 (KHTML, like Gecko) Version/8.0.3 Safari/600.3.18"
   };

@@ -25,8 +25,11 @@
 * [`api.getUserInfo`](#getUserInfo)
 * [`api.handleMessageRequest`](#handleMessageRequest)
 * [`api.listen`](#listen)
+* [`api.listenMqtt`](#listenMqtt)
 * [`api.logout`](#logout)
+* [`api.markAsDelivered`](#markAsDelivered)
 * [`api.markAsRead`](#markAsRead)
+* [`api.markAsReadAll`](#markAsReadAll)
 * [`api.muteThread`](#muteThread)
 * [`api.removeUserFromGroup`](#removeUserFromGroup)
 * [`api.resolvePhotoUrl`](#resolvePhotoUrl)
@@ -37,6 +40,7 @@
 * [`api.setOptions`](#setOptions)
 * [`api.setTitle`](#setTitle)
 * [`api.threadColors`](#threadColors)
+* [`api.unsendMessage`](#unsendMessage)
 
 ---------------------------------------
 
@@ -136,6 +140,7 @@ var rl = readline.createInterface({
   output: process.stdout
 });
 
+const obj = {email: "FB_EMAIL", password: "FB_PASSWORD"};
 login(obj, (err, api) => {
     if(err) {
         switch (err.error) {
@@ -608,7 +613,7 @@ __Arguments__
 | isSubscribed |  |
 | folder | The folder that the thread is in. Can be one of: <ul><li>'inbox'</li><li>'archive'</li></ul> |
 | isArchived | True if the thread is archived, false if not |
-| cannotReplyReason | If canReply is false, this will be a string stating why. Null if canReply is true. |
+| cannotReplyReason | If you cannot reply to this thread, this will be a string stating why. Otherwise it will be null. |
 | lastReadTimestamp | Timestamp of the last message that is marked as 'read' by the current user. |
 | emoji | Object with key 'emoji' whose value is the emoji unicode character. Null if unset. |
 | color | String form of the custom color in hexadecimal form. |
@@ -1183,6 +1188,74 @@ The message object will contain different fields based on its type (as determine
 		<td><code>userID</code></td>
 		<td>The ID of the user whose status this packet is describing.</td>
 	</tr>
+	<tr>
+		<td rowspan="5">
+			<code>"message_unsend"</code><br />
+			A revoke message request for a message from a thread was received.
+		</td>
+		<td><code>threadID</code></td>
+		<td>The threadID representing the thread in which the revoke message request was received.</td>
+	</tr>
+	<tr>
+		<td><code>senderID</code></td>
+		<td>The id of the person who request to revoke message on threadID.</td>
+	</tr>
+	<tr>
+		<td><code>messageID</code></td>
+		<td>A string representing the message ID that the person request to revoke message want to.</td>
+	</tr>
+	<tr>
+		<td><code>deletionTimestamp</code></td>
+		<td>The time when the request was sent.</td>
+    </tr>
+    <tr>
+		<td><code>type</code></td>
+		<td>For this event type, this will always be the string <code>"message_unsend"</code>.</td>
+	</tr>
+	<tr>
+		<td rowspan="10">
+			<code>"message_reply"</code><br />
+			A reply message was sent to a thread.
+		</td>
+		<td><code>attachments</code></td>
+		<td>An array of attachments to the message. Attachments vary in type, see the attachments table below.</td>
+	</tr>
+	<tr>
+		<td><code>body</code></td>
+		<td>The string corresponding to the message that was just received.</td>
+	</tr>
+	<tr>
+		<td><code>isGroup</code></td>
+		<td>boolean, true if this thread is a group thread (more than 2 participants).</td>
+	</tr>
+    <tr>
+        <td><code>mentions</code></td>
+        <td>An object containing people mentioned/tagged in the message in the format { id: name }</td>
+    </tr>
+	<tr>
+		<td><code>messageID</code></td>
+		<td>A string representing the message ID.</td>
+	</tr>
+	<tr>
+		<td><code>senderID</code></td>
+		<td>The id of the person who sent the message in the chat with threadID.</td>
+	</tr>
+	<tr>
+		<td><code>threadID</code></td>
+		<td>The threadID representing the thread in which the message was sent.</td>
+	</tr>
+  	<tr>
+		<td><code>isUnread</code></td>
+		<td>Boolean representing whether or not the message was read.</td>
+	</tr>
+	<tr>
+		<td><code>type</code></td>
+		<td>For this event type, this will always be the string <code>"message_reply"</code>.</td>
+	</tr>
+	<tr>
+		<td><code>messageReply</code></td>
+		<td>An object represent a message being replied. Content inside is the same like a normal <code>"message"</code> event.</td>
+	</tr>
 </table>
 
 __Attachments__
@@ -1237,6 +1310,22 @@ login({appState: JSON.parse(fs.readFileSync('appstate.json', 'utf8'))}, (err, ap
 
 ---------------------------------------
 
+<a name="listenMqtt"></a>
+### api.listenMqtt(callback) (Experimental)
+Same as [`api.listen`](#listen) but uses MQTT to recieve data.
+
+Will call `callback` when a new message is received on this account.
+By default this won't receive events (joining/leaving a chat, title change etc...) but it can be activated with `api.setOptions({listenEvents: true})`.  This will by default ignore messages sent by the current account, you can enable listening to your own messages with `api.setOptions({selfListen: true})`. This returns `stopListening` that will stop the `listen` loop and is guaranteed to prevent any future calls to the callback given to `listenMqtt`. An immediate call to `stopListening` when an error occurs will prevent the listen function to continue.
+
+
+__Arguments__
+
+- `callback(error, message)`: A callback called every time the logged-in account receives a new message.
+
+Messages and Events are the same as [`api.listen`](#listen)
+
+---------------------------------------
+
 <a name="logout"></a>
 ### api.logout([callback])
 
@@ -1248,10 +1337,45 @@ __Arguments__
 
 ---------------------------------------
 
+<a name="markAsDelivered"></a>
+### api.markAsDelivered(threadID, messageID[, callback]])
+
+Given a threadID and a messageID will mark that message as delivered. If a message is marked as delivered that tells facebook servers that it was recieved.
+
+You can also mark new messages as delivered automatically. This is enabled by default. See [api.setOptions](#setOptions).
+
+__Arguments__
+
+* `threadID` - The id of the thread in which you want to mark the message as delivered.
+* `messageID` - The id of the message want to mark as delivered.
+* `callback(err)` - A callback called when the operation is done maybe with an object representing an error.
+
+__Example__
+
+```js
+const fs = require("fs");
+const login = require("facebook-chat-api");
+
+login({appState: JSON.parse(fs.readFileSync('appstate.json', 'utf8'))}, (err, api) => {
+    if(err) return console.error(err);
+
+    api.listen((err, message) => {
+        if(err) return console.error(err);
+
+        // Marks messages as delivered immediately after they're received
+        api.markAsDelivered(message.threadID, message.messageID);
+    });
+});
+```
+
+---------------------------------------
+
 <a name="markAsRead"></a>
-### api.markAsRead(threadID, [read, [, callback]])
+### api.markAsRead(threadID, [read[, callback]])
 
 Given a threadID will mark all the unread messages as read. Facebook will take a couple of seconds to show that you've read the messages.
+
+You can also mark new messages as read automatically. See [api.setOptions](#setOptions).
 
 __Arguments__
 
@@ -1276,6 +1400,13 @@ login({appState: JSON.parse(fs.readFileSync('appstate.json', 'utf8'))}, (err, ap
     });
 });
 ```
+
+---------------------------------------
+
+<a name="markAsReadAll"></a>
+### api.markAsReadAll([callback]])
+
+This function will mark all of messages in your inbox readed.
 
 ---------------------------------------
 
@@ -1351,7 +1482,7 @@ __Arguments__
 ---------------------------------------
 
 <a name="sendMessage"></a>
-### api.sendMessage(message, threadID[, callback])
+### api.sendMessage(message, threadID[, callback][, messageID])
 
 Sends the given message to the threadID.
 
@@ -1359,7 +1490,8 @@ __Arguments__
 
 * `message`: A string (for backward compatibility) or a message object as described below.
 * `threadID`: A string, number, or array representing a thread. It happens to be someone's userID in the case of a one to one conversation or an array of userIDs when starting a new group chat.
-* `callback(err, messageInfo)`: A callback called when sending the message is done (either with an error or with an confirmation object). `messageInfo` contains the `threadID` where the message was sent and a `messageID`, as well as the `timestamp` of the message.
+* `callback(err, messageInfo)`: (Optional) A callback called when sending the message is done (either with an error or with an confirmation object). `messageInfo` contains the `threadID` where the message was sent and a `messageID`, as well as the `timestamp` of the message.
+* `messageID`: (Optional) A string representing a message you want to reply.
 
 __Message Object__:
 
@@ -1491,6 +1623,9 @@ __Arguments__
     - `pageID`: (Default empty) Makes [api.listen](#listen) only receive messages through the page specified by that ID. Also makes `sendMessage` and `sendSticker` send from the page.
     - `updatePresence`: (Default `false`) Will make [api.listen](#listen) also return `presence` ([api.listen](#presence) for more details).
     - `forceLogin`: (Default `false`) Will automatically approve of any recent logins and continue with the login process.
+    - `userAgent`: (Default `Mozilla/5.0 (Macintosh; Intel Mac OS X 10_10_2) AppleWebKit/600.3.18 (KHTML, like Gecko) Version/8.0.3 Safari/600.3.18`) The desired simulated User Agent.
+	- `autoMarkDelivery`: (Default `true`) Will automatically mark new messages as delivered. See [api.markAsDelivered](#markAsDelivered).
+	- `autoMarkRead`: (Default `false`) Will automatically mark new messages as read/seen. See [api.markAsRead](#markAsRead).
 
 __Example__
 
@@ -1533,5 +1668,19 @@ __Arguments__
 * `newTitle`: A string representing the new title.
 * `threadID`: A string or number representing a thread. It happens to be someone's userID in the case of a one to one conversation.
 * `callback(err, obj)` - A callback called when sending the message is done (either with an error or with an confirmation object). `obj` contains only the threadID where the message was sent.
+
+---------------------------------------
+
+<a name="unsendMessage"></a>
+### api.unsendMessage(messageID[, callback])
+
+Revokes a message from anyone that could see that message with `messageID`
+
+Note: This will only work if the message is sent by you and was sent less than 10 minutes ago.
+
+__Arguments__
+
+* `messageID`: Message ID you want to unsend.
+* `callback(err)`: A callback called when the query is done (with an error or with null).
 
 ---------------------------------------

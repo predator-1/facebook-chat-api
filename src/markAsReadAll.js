@@ -4,29 +4,24 @@ var utils = require("../utils");
 var log = require("npmlog");
 
 module.exports = function(defaultFuncs, api, ctx) {
-  return function changeThreadEmoji(emoji, threadID, callback) {
+  return function markAsReadAll(callback) {
     if (!callback) {
       callback = function() {};
     }
+
     var form = {
-      emoji_choice: emoji,
-      thread_or_other_fbid: threadID
+      folder: 'inbox'
     };
 
     defaultFuncs
       .post(
-        "https://www.facebook.com/messaging/save_thread_emoji/?source=thread_settings&__pc=EXP1%3Amessengerdotcom_pkg",
+        "https://www.facebook.com/ajax/mercury/mark_folder_as_read.php",
         ctx.jar,
         form
       )
+      .then(utils.saveCookies(ctx.jar))
       .then(utils.parseAndCheckLogin(ctx, defaultFuncs))
       .then(function(resData) {
-        if (resData.error === 1357031) {
-          throw {
-            error:
-              "Trying to change emoji of a chat that doesn't exist. Have at least one message in the thread before trying to change the emoji."
-          };
-        }
         if (resData.error) {
           throw resData;
         }
@@ -34,7 +29,7 @@ module.exports = function(defaultFuncs, api, ctx) {
         return callback();
       })
       .catch(function(err) {
-        log.error("changeThreadEmoji", err);
+        log.error("markAsReadAll", err);
         return callback(err);
       });
   };
